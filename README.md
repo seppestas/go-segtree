@@ -8,9 +8,9 @@ Based on:
 - [go-stree](https://github.com/toberndo/go-stree) by @toberndo
 - Chapter 10.3 of [Computational Geometry: Algorithms and Applications](http://www.cs.uu.nl/geobook/) rev. 3 by Mark de Berg, Otfried Cheong, Marc van Kreveld and Mark Overmars (ISBN [978-3-540-77973-5](http://link.springer.com/book/10.1007%2F978-3-540-77974-2))
 
-The elements are sent to a channel as soon as they are found in the tree. This allows efficient querying of e.g multi-dimensional trees (trees containing trees). The elements are not sent in any specific order, however each found element will only be sent once.
+The elements are sent on a channel as soon as they are found in the tree. This allows efficient querying of e.g multi-dimensional trees (trees containing trees). The elements are not sent in any specific order, however each found element will only be sent once.
 
-# Example usages:
+## Example usages:
 
 ```go
 tree := new(segtree.Tree)
