@@ -1,6 +1,6 @@
 # Go segtree
 
-A segment tree implementation written in Go.
+A [segment tree](http://en.wikipedia.org/wiki/Segment_tree) implementation written in Go.
 
 This library allows storing and retrieving elements indexed by a range. It does this by storing the elements in a segment tree.
 
