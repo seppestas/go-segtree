@@ -24,6 +24,50 @@ func TestFindingSingleElement(t *testing.T) {
 	}
 }
 
+func TestFindingElementSizeZeroRange(t *testing.T) {
+	tree := new(Tree)
+	test := "hello, world"
+	tree.Push(1, 1, test)
+	tree.BuildTree()
+
+	results, err := tree.QueryIndex(1)
+	if err != nil {
+		queryFailed(t, err)
+	}
+
+	result := <-results
+
+	if result != test {
+		wrongElement(t, result, test)
+	}
+
+	if _, ok := <-results; ok != false {
+		toManyElements(t)
+	}
+}
+
+func TestFindingElementPseudoEndlessRange(t *testing.T) {
+	tree := new(Tree)
+	test := "hello, world"
+	tree.Push(1, Inf, test)
+	tree.BuildTree()
+
+	results, err := tree.QueryIndex(9999)
+	if err != nil {
+		queryFailed(t, err)
+	}
+
+	result := <-results
+
+	if result != test {
+		wrongElement(t, result, test)
+	}
+
+	if _, ok := <-results; ok != false {
+		toManyElements(t)
+	}
+}
+
 func find(element interface{}, elements []interface{}) (bool, int) {
 	for i, e := range elements {
 		if element == e {
