@@ -83,17 +83,17 @@ func removedups(sorted []int) (unique []int) {
 // Creates a sorted slice of unique endpoints from a tree's base
 func (t *Tree) endpoints() []int {
 	baseLen := len(t.base)
-	endpoints := make([]int, baseLen*2+2)
+	endpoints := make([]int, baseLen*2)
 
 	// When there are a lot of intervals, there is a big chance of big overlaps
 	// Try to have the endpoints sorted as much as possible when putting them
 	// in the slice to reduce the final sort time.
-	endpoints[0] = NegInf
+	// endpoints[0] = NegInf
 	for i, interval := range t.base {
-		endpoints[1+i] = interval.from
-		endpoints[1+i+baseLen] = interval.to
+		endpoints[i] = interval.from
+		endpoints[i+baseLen] = interval.to
 	}
-	endpoints[baseLen*2+1] = Inf
+	// endpoints[baseLen*2+1] = Inf
 
 	sort.Sort(sort.IntSlice(endpoints))
 
@@ -101,14 +101,19 @@ func (t *Tree) endpoints() []int {
 }
 
 // Creates a slice of elementary intervals from a slice of (sorted) endpoints
-// Input: [-∞, p1, p2, ..., pn, +∞]
-// Output: [{−∞ : p1}, {p1 : p1}, {p1 : p2}, {p2 : p2},... , {pn : +∞}
+// Input: [p1, p2, ..., pn]
+// Output: [{p1 : p1}, {p1 : p2}, {p2 : p2},... , {pn : pn}
 func elementaryIntervals(endpoints []int) []segment {
-	intervals := make([]segment, len(endpoints)*2-3)
-	for i := 0; i < len(endpoints)-1; i++ {
-		intervals[i*2] = segment{endpoints[i], endpoints[i+1]}
-		if i < len(endpoints)-2 { // don't store {inf, inf}
-			intervals[i*2+1] = segment{endpoints[i+1], endpoints[i+1]}
+	if len(endpoints) == 1 {
+		return []segment{segment{endpoints[0], endpoints[0]}}
+	}
+
+	intervals := make([]segment, len(endpoints)*2-1)
+
+	for i := 0; i < len(endpoints); i++ {
+		intervals[i*2] = segment{endpoints[i], endpoints[i]}
+		if i < len(endpoints)-1 {
+			intervals[i*2+1] = segment{endpoints[i], endpoints[i+1]}
 		}
 	}
 	return intervals
@@ -196,14 +201,16 @@ func (s segment) contains(index int) bool {
 }
 
 func query(node *node, index int, results chan<- *interval) {
-	for _, interval := range node.intervals {
-		results <- interval
-	}
-	if node.left != nil && node.right != nil {
-		if node.left.segment.contains(index) {
+	if node.segment.contains(index) {
+		for _, interval := range node.intervals {
+			results <- interval
+		}
+		if node.left != nil {
 			query(node.left, index, results)
-		} else {
+		}
+		if node.right != nil {
 			query(node.right, index, results)
 		}
 	}
+
 }

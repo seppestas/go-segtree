@@ -34,8 +34,8 @@ func ExampleTree_QueryIndex_multiple_elements() {
 	}
 
 	// Output:
-	// Found: hello, world
 	// Found: 3.14
+	// Found: hello, world
 }
 
 func ExampleTree_QueryIndex_2_dimensional() {
