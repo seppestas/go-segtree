@@ -32,8 +32,9 @@ type node struct {
 }
 
 type Tree struct {
-	base []interval
-	root *node
+	base     []interval
+	elements map[interface{}]struct{}
+	root     *node
 }
 
 // Push pushes an interval to the interval stack
@@ -41,6 +42,10 @@ func (t *Tree) Push(from, to int, element interface{}) {
 	if to < from {
 		from, to = to, from
 	}
+	if t.elements == nil {
+		t.elements = make(map[interface{}]struct{})
+	}
+	t.elements[element] = struct{}{}
 	t.base = append(t.base, interval{segment{from, to}, element})
 }
 
@@ -181,6 +186,7 @@ func (t *Tree) QueryIndex(index int) (<-chan interface{}, error) {
 	elements := make(chan interface{})
 
 	go func(intervals chan *interval, elements chan interface{}) {
+		defer close(elements)
 		results := make(map[interface{}]struct{})
 		for interval := range intervals {
 			_, alreadyFound := results[interval.element]
@@ -188,9 +194,13 @@ func (t *Tree) QueryIndex(index int) (<-chan interface{}, error) {
 				// Store an empty struct in the map to minimize memory footprint
 				results[interval.element] = struct{}{}
 				elements <- interval.element
+				if len(results) >= len(t.elements) {
+					// found all elements that can be found
+					return
+				}
 			}
+
 		}
-		close(elements)
 	}(intervals, elements)
 
 	return elements, nil
@@ -212,5 +222,4 @@ func query(node *node, index int, results chan<- *interval) {
 			query(node.right, index, results)
 		}
 	}
-
 }
